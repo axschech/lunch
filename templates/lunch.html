@@ -1,0 +1,26 @@
+<div class="col-md-6">
+    <form class="horizontal-form">
+        <label for="street">Street</label>
+        <input type="text" id="street" ng-model="street" class="form-control">
+        <label for="zipcode">Zipcode</label>
+        <input type="text" id="zipcode" ng-model="zipcode" class="form-control">
+        <br />
+        <button class="btn" ng-click="submit()">GET RESULTS</button>
+    </form>
+</div>
+<div class="col-md-6">
+    <div class="text-center" ng-show="results.loading">
+            <h1><span class="label label-warning label-lg"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...</span></h1>
+    </div>
+    <div ng-show="results.cuisines.length > 0">
+        <h2>Choose a category <small>or</small> GO CRAZY</h2>
+            <p ng-repeat="item in results.cuisines">
+                <span class="col-md-6">
+                    {{item.name}} <span class="badge pull-right"> {{item.count}} </span>
+                </span>
+                <span class="col-md-6">
+                    Choose
+                </span>
+            </p>
+    </div>
+</div>
