@@ -1,3 +1,6 @@
+<div class="page-header">
+<h1>CHOOSE FOOD<small class="pull-right"><a href="/lunch">Back</a></small></h1>
+</div>
 <div class="col-md-6">
     <form class="horizontal-form">
         <label for="street">Street</label>
@@ -5,7 +8,12 @@
         <label for="zipcode">Zipcode</label>
         <input type="text" id="zipcode" ng-model="zipcode" class="form-control">
         <br />
-        <button class="btn" ng-click="submit()">GET RESULTS</button>
+        <button class="btn" ng-click="submit()">GET RESULTS</button> 
+        <button ng-show="results.cuisines.length > 0"
+                ng-disabled="results.selected === 0"
+                ng-click="eat()"
+                class="btn">GET READY TO EAT
+        </button>
     </form>
 </div>
 <div class="col-md-6">
@@ -14,13 +22,17 @@
     </div>
     <div ng-show="results.cuisines.length > 0">
         <h2>Choose a category <small>or</small> GO CRAZY</h2>
-            <p ng-repeat="item in results.cuisines">
-                <span class="col-md-6">
-                    {{item.name}} <span class="badge pull-right"> {{item.count}} </span>
-                </span>
-                <span class="col-md-6">
-                    Choose
-                </span>
-            </p>
+            <table class="table-hover table">
+                <tr ng-repeat="item in results.cuisines"
+                    ng-click="select(item)"
+                    ng-class="{selected: item.select === true}">
+                    <td class="col-md-6">
+                        {{item.name}}
+                    </td>
+                    <td class="col-md-6">
+                        <span class="badge pull-right"> {{item.count}} </span>
+                    </td>
+                </tr>
+            </table>
     </div>
 </div>

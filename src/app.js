@@ -1,17 +1,22 @@
 angular.module('app', [
     'ngRoute'
 ])
-    .config(function ($routeProvider) {
+    .config(function (
+        $routeProvider,
+        $locationProvider
+    ) {
         'use strict';
+
         $routeProvider
             .when('/', {
                 controller: 'MainCtrl',
                 templateUrl: 'templates/main.html'
             })
-            .when('/lunch', {
+            .when('/choose', {
                 controller: 'LunchCtrl',
                 templateUrl: 'templates/lunch.html'
             });
+        $locationProvider.html5Mode(true);
     })
     .value('client_id', 'OTZlYWJhYjMyMjhkYzYyOGRjNTlkZTY5MTYyMDlmOGI0')
     .service('Results', function (
@@ -83,7 +88,7 @@ angular.module('app', [
     ) {
         'use strict';
         $scope.go = function () {
-            $location.path('/lunch');
+            $location.path('/choose');
         };
     })
     .controller('LunchCtrl', function (
@@ -96,7 +101,8 @@ angular.module('app', [
         $scope.zipcode = "";
         $scope.results = {
             cuisines: [],
-            loading: false
+            loading: false,
+            selected: 0
         };
         $scope.submit = function () {
             $scope.results.cuisines = [];
@@ -108,5 +114,23 @@ angular.module('app', [
                 $scope.results.cuisines = Results.data.cuisines;
                 $scope.results.loading = false;
             });
+        };
+
+        $scope.select = function (item) {
+            if (angular.isDefined(item.select)) {
+                item.select = !item.select;
+            } else {
+                item.select = true;
+            }
+
+            if (item.select === true) {
+                $scope.results.selected++;
+            } else {
+                $scope.results.selected--;
+            }
+        };
+
+        $scope.eat = function () {
+
         };
     });
