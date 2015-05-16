@@ -19,7 +19,31 @@ angular.module('app', [
         $locationProvider.html5Mode(true);
     })
     .value('client_id', 'OTZlYWJhYjMyMjhkYzYyOGRjNTlkZTY5MTYyMDlmOGI0')
-    .service('Results', function (
+    .service('Choice', function (
+        client_id,
+        $http,
+        $q
+    ) {
+        'use strict';
+        return {
+            possible: [],
+            get: function () {
+                angular.forEach(this.possible, function (item) {
+                    console.log(item);
+                });
+            },
+            fetch: function (id) {
+                $http({
+                    url: 'https://sandbox.delivery.com/merchant/' + id + '/menu',
+                    method: 'GET',
+                    params: {
+                        client_id: client_id
+                    }
+                });
+            }
+        };
+    })
+    .service('Cuisines', function (
         client_id,
         $http,
         $q
@@ -34,7 +58,8 @@ angular.module('app', [
                 self = this;
                 deferred = $q.defer();
                 if (this.street === "" || this.zipcode === "") {
-                    return false;
+                    deferred.reject();
+                    return deferred.promise;
                 }
                 promise = this.fetch(
                     {
@@ -94,36 +119,72 @@ angular.module('app', [
     .controller('LunchCtrl', function (
         $scope,
         $location,
-        Results
+        Cuisines,
+        Choice
     ) {
         'use strict';
         $scope.street = "";
         $scope.zipcode = "";
         $scope.results = {
             cuisines: [],
+            merchants: {},
             loading: false,
+            warning: "",
             selected: 0
         };
+
+        $scope.selected = function () {
+            var arr = [];
+            if ($scope.results.cuisines.length === 0) {
+                return false;
+            }
+            angular.forEach($scope.results.cuisines, function (item) {
+                if (angular.isDefined(item.selected) && item.selected === true) {
+                    arr.push(item);
+                }
+            });
+
+            return arr;
+        };
+
+        $scope.filter = function (merchants) {
+            angular.forEach(merchants, function (merchant) {
+                angular.forEach(merchant.summary.cuisines, function (item) {
+                    if (angular.isDefined($scope.results.merchants[item])) {
+                        $scope.results.merchants[item].push(merchant.id);
+                    } else {
+                        $scope.results.merchants[item] = [merchant.id];
+                    }
+                });
+            });
+        };
+
         $scope.submit = function () {
+            $scope.results.warning = "";
             $scope.results.cuisines = [];
             $scope.results.loading = true;
-            Results.street = $scope.street;
-            Results.zipcode = $scope.zipcode;
-            var promise = Results.get();
+            Cuisines.street = $scope.street;
+            Cuisines.zipcode = $scope.zipcode;
+            var promise = Cuisines.get();
             promise.then(function () {
-                $scope.results.cuisines = Results.data.cuisines;
+                $scope.results.cuisines = Cuisines.data.cuisines;
+                $scope.filter(Cuisines.data.merchants);
+                console.log($scope.results.merchants);
                 $scope.results.loading = false;
+            }, function () {
+                $scope.results.loading = false;
+                $scope.results.warning = "No results found";
             });
         };
 
         $scope.select = function (item) {
-            if (angular.isDefined(item.select)) {
-                item.select = !item.select;
+            if (angular.isDefined(item.selected)) {
+                item.selected = !item.selected;
             } else {
-                item.select = true;
+                item.selected = true;
             }
 
-            if (item.select === true) {
+            if (item.selected === true) {
                 $scope.results.selected++;
             } else {
                 $scope.results.selected--;
@@ -131,6 +192,8 @@ angular.module('app', [
         };
 
         $scope.eat = function () {
-
+            var selectedRows;
+            selectedRows = $scope.selected();
+            Choice.possible = $scope.results.cuisines;
         };
     });
