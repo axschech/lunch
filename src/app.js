@@ -28,9 +28,11 @@ angular.module('app', [
         return {
             possible: [],
             get: function () {
-                angular.forEach(this.possible, function (item) {
-                    console.log(item);
-                });
+                var merged = [], index;
+                merged = merged.concat.apply(merged, this.possible);
+                index = Math.floor(Math.random() * merged.length);
+                console.log(merged.length);
+                console.log(index);
             },
             fetch: function (id) {
                 $http({
@@ -72,11 +74,15 @@ angular.module('app', [
                         self.fallback(response.data.addresses[0]).then(function (response) {
                             self.data = response.data;
                             deferred.resolve();
+                        }, function () {
+                            deferred.reject();
                         });
                     } else {
                         self.data = response.data;
                         deferred.resolve();
                     }
+                }, function () {
+                    deferred.reject();
                 });
 
                 return deferred.promise;
@@ -118,7 +124,6 @@ angular.module('app', [
     })
     .controller('LunchCtrl', function (
         $scope,
-        $location,
         Cuisines,
         Choice
     ) {
@@ -138,9 +143,16 @@ angular.module('app', [
             if ($scope.results.cuisines.length === 0) {
                 return false;
             }
+            if (Object.keys($scope.results.merchants).length === 0) {
+                return false;
+            }
             angular.forEach($scope.results.cuisines, function (item) {
                 if (angular.isDefined(item.selected) && item.selected === true) {
-                    arr.push(item);
+                    angular.forEach($scope.results.merchants, function (value, key) {
+                        if (item.name === key) {
+                            arr.push(value);
+                        }
+                    });
                 }
             });
 
@@ -160,6 +172,7 @@ angular.module('app', [
         };
 
         $scope.submit = function () {
+            $scope.results.selected = 0;
             $scope.results.warning = "";
             $scope.results.cuisines = [];
             $scope.results.loading = true;
@@ -189,11 +202,12 @@ angular.module('app', [
             } else {
                 $scope.results.selected--;
             }
+            console.log(item);
         };
 
         $scope.eat = function () {
-            var selectedRows;
-            selectedRows = $scope.selected();
-            Choice.possible = $scope.results.cuisines;
+            Choice.possible = $scope.selected();
+
+            Choice.get();
         };
     });
