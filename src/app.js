@@ -19,33 +19,54 @@ angular.module('app', [
         $locationProvider.html5Mode(true);
     })
     .value('client_id', 'OTZlYWJhYjMyMjhkYzYyOGRjNTlkZTY5MTYyMDlmOGI0')
-    .service('Choice', function (
+    .service('Random', function () {
+        return function (length) {
+            return Math.floor(Math.random() * length);
+        }
+    })
+    .factory('Choice', function (
         client_id,
+        Random,
         $http,
         $q
     ) {
         'use strict';
         return {
             possible: [],
+            item: {},
+            chose: function (response) {
+                var keys, items, payload = {};
+                keys = Object.keys(response.data.menu);
+                items = response.data.menu[keys[Random(keys.length)]].children;
+                payload.parent = items[Random(items.length)];
+                if (payload.parent.children.length !== 0) {
+                   payload.child = payload.parent.children[Random(payload.parent.children.length)];
+                }
+                return payload;
+            },
             get: function () {
-                var merged = [], index;
-                merged = merged.concat.apply(merged, this.possible);
-                index = Math.floor(Math.random() * merged.length);
-                console.log(merged.length);
-                console.log(index);
+                var merged = [], index, self = this;
+                merged = merged.concat.apply(merged, self.possible);
+                index = Random(merged.length);
+                self.fetch(merged[index]).then(function (response) {
+                   self.item = self.chose(response);
+                   console.log(self.item);
+                });
             },
             fetch: function (id) {
-                $http({
+                return $http({
                     url: 'https://sandbox.delivery.com/merchant/' + id + '/menu',
                     method: 'GET',
                     params: {
-                        client_id: client_id
+                        client_id: client_id,
+                        hide_unavailable: 1,
+                        item_only: 1
                     }
                 });
             }
         };
     })
-    .service('Cuisines', function (
+    .factory('Cuisines', function (
         client_id,
         $http,
         $q
