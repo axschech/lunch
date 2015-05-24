@@ -13,7 +13,7 @@
         <button class="btn" ng-click="submit()">GET RESULTS</button> 
         <button ng-show="results.cuisines.length > 0"
                 ng-disabled="results.selected === 0"
-                ng-click="eat()"
+                ng-click="eat(false)"
                 class="btn">GET READY TO EAT
         </button>
     </form>
@@ -26,7 +26,7 @@
         <h1><span class="label label-danger label-lg">{{results.warning}}</span></h1>
     </div>
     <div ng-show="results.cuisines.length > 0">
-        <h2>Choose a category <small>or</small> GO CRAZY</h2>
+        <h2>Choose a category <small>or</small> <a href="" ng-click="eat(true)">GO CRAZY</a></h2>
             <table class="table-hover table">
                 <tr ng-repeat="item in results.cuisines"
                     ng-click="select(item)"

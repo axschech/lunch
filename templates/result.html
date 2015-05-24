@@ -1,0 +1,11 @@
+<div class="page-header">
+<h1><span class="label label-info"><span class="glyphicon glyphicon-arrow-left"></span> <a href="" ng-click="back()" style="color:white">BACK</a></span></h1>
+<h1 class="text-center">EAT FOOD</h1>
+</div>
+<div class="text-center">
+	<h2>{{item.parent.name}}</h2>
+	<h2 ng-show="item.child"><small>{{item.child.name}}</small></h2>
+	<h3 ng-hide="item.child">${{item.parent.price}}</h3>
+	<h3 ng-show="item.child">${{item.child.price}}</h3>
+	<h1><a href="" ng-click="buy()">Buy</a> | <a href="" ng-click="again()">Nope</a></h1>
+</div>

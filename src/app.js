@@ -10,11 +10,17 @@ angular.module('app', [
         $routeProvider
             .when('/', {
                 controller: 'MainCtrl',
-                templateUrl: 'templates/main.html'
+                templateUrl: 'templates/main.html',
             })
             .when('/choose', {
                 controller: 'LunchCtrl',
-                templateUrl: 'templates/lunch.html'
+                templateUrl: 'templates/lunch.html',
+                reloadOnSearch: false
+            })
+            .when('/result', {
+                controller: 'ResultCtrl',
+                templateUrl: 'templates/result.html',
+                reloadOnSearch: false
             });
         $locationProvider.html5Mode(true);
     })
@@ -45,13 +51,18 @@ angular.module('app', [
                 return payload;
             },
             get: function () {
-                var merged = [], index, self = this;
+                var merged = [], 
+                    index, 
+                    self = this,
+                    deferred = $q.defer();
                 merged = merged.concat.apply(merged, self.possible);
                 index = Random(merged.length);
                 self.fetch(merged[index]).then(function (response) {
                    self.item = self.chose(response);
                    console.log(self.item);
+                   deferred.resolve();
                 });
+                return deferred.promise;
             },
             fetch: function (id) {
                 return $http({
@@ -145,6 +156,7 @@ angular.module('app', [
     })
     .controller('LunchCtrl', function (
         $scope,
+        $location,
         Cuisines,
         Choice
     ) {
@@ -223,12 +235,38 @@ angular.module('app', [
             } else {
                 $scope.results.selected--;
             }
-            console.log(item);
         };
 
-        $scope.eat = function () {
-            Choice.possible = $scope.selected();
+        $scope.eat = function (random) {
+            if (random) {
+                angular.forEach($scope.results.merchants, function (merchant) {
+                    Choice.possible.push(merchant);
+                });
+            } else {
+                Choice.possible = $scope.selected();
+            }
 
-            Choice.get();
+            Choice.get().then(function () {
+                $location.path('result');
+            });
         };
+    })
+    .controller('ResultCtrl', function (
+        $scope,
+        $location,
+        Choice
+    ) {
+        $scope.back = function () { $location.path('choose', false); }
+        $scope.item = Choice.item;
+
+        if (Object.keys($scope.item).length === 0) {
+            $scope.back();
+        }
+
+        $scope.again = function () {
+            Choice.get().then(function () {
+                $scope.item = Choice.item;
+            });
+
+        }
     });
