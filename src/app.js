@@ -68,12 +68,10 @@ angular.module('app', [
                 return false;
             },
             find_children: function (input) {
-                var x = true;
                 if (this.check_children(input)) {
                     return input;
-                } else {
-                    return this.find_children(input.children[0]);
                 }
+                return this.find_children(input.children[0]);
             },
             chose: function (response) {
                 var keys, items, payload = {};
@@ -93,9 +91,9 @@ angular.module('app', [
                 merged = merged.concat.apply(merged, self.possible);
                 index = Random(merged.length);
                 self.fetch(merged[index]).then(function (response) {
-                   self.item = self.chose(response);
-                   self.item.id = merged[index];
-                   deferred.resolve();
+                    self.item = self.chose(response);
+                    self.item.id = merged[index];
+                    deferred.resolve();
                 });
                 return deferred.promise;
             },
@@ -293,7 +291,7 @@ angular.module('app', [
         Order
     ) {
         'use strict';
-        $scope.back = function () { $location.path('choose', false); }
+        $scope.back = function () { $location.path('choose', false); };
         $scope.item = Choice.item;
 
         if (Object.keys($scope.item).length === 0) {
@@ -304,7 +302,7 @@ angular.module('app', [
             Choice.get().then(function () {
                 $scope.item = Choice.item;
             });
-        }
+        };
 
         $scope.buy = function () {
             if ($scope.item.id === undefined) {
@@ -313,5 +311,5 @@ angular.module('app', [
             }
             Order.id = $scope.item.id;
             Order.get();
-        }
+        };
     });
