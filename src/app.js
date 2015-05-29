@@ -26,9 +26,29 @@ angular.module('app', [
     })
     .value('client_id', 'OTZlYWJhYjMyMjhkYzYyOGRjNTlkZTY5MTYyMDlmOGI0')
     .service('Random', function () {
+        'use strict';
         return function (length) {
             return Math.floor(Math.random() * length);
-        }
+        };
+    })
+    .factory('Order', function (
+        client_id,
+        $http
+    ) {
+        'use strict';
+        return {
+            id: "",
+            get: function () {
+                var self = this;
+                return $http({
+                    url: 'https://sandbox.delivery.com/merchant/' + self.id,
+                    method: 'GET',
+                    params: {
+                        client_id: client_id
+                    }
+                });
+            }
+        };
     })
     .factory('Choice', function (
         client_id,
@@ -40,26 +60,41 @@ angular.module('app', [
         return {
             possible: [],
             item: {},
+            check_children: function (input) {
+                if (angular.isUndefined(input.children) ||
+                        input.children.length === 0) {
+                    return true;
+                }
+                return false;
+            },
+            find_children: function (input) {
+                var x = true;
+                if (this.check_children(input)) {
+                    return input;
+                } else {
+                    return this.find_children(input.children[0]);
+                }
+            },
             chose: function (response) {
                 var keys, items, payload = {};
                 keys = Object.keys(response.data.menu);
                 items = response.data.menu[keys[Random(keys.length)]].children;
                 payload.parent = items[Random(items.length)];
-                if (payload.parent.children.length !== 0) {
-                   payload.child = payload.parent.children[Random(payload.parent.children.length)];
+                if (!this.check_children(payload.parent)) {
+                    payload.child = this.find_children(payload.parent);
                 }
                 return payload;
             },
             get: function () {
-                var merged = [], 
-                    index, 
+                var merged = [],
+                    index,
                     self = this,
                     deferred = $q.defer();
                 merged = merged.concat.apply(merged, self.possible);
                 index = Random(merged.length);
                 self.fetch(merged[index]).then(function (response) {
                    self.item = self.chose(response);
-                   console.log(self.item);
+                   self.item.id = merged[index];
                    deferred.resolve();
                 });
                 return deferred.promise;
@@ -71,7 +106,7 @@ angular.module('app', [
                     params: {
                         client_id: client_id,
                         hide_unavailable: 1,
-                        item_only: 1
+                        items_only: 1
                     }
                 });
             }
@@ -254,8 +289,10 @@ angular.module('app', [
     .controller('ResultCtrl', function (
         $scope,
         $location,
-        Choice
+        Choice,
+        Order
     ) {
+        'use strict';
         $scope.back = function () { $location.path('choose', false); }
         $scope.item = Choice.item;
 
@@ -267,6 +304,14 @@ angular.module('app', [
             Choice.get().then(function () {
                 $scope.item = Choice.item;
             });
+        }
 
+        $scope.buy = function () {
+            if ($scope.item.id === undefined) {
+                console.error('No merchant ID found');
+                return false;
+            }
+            Order.id = $scope.item.id;
+            Order.get();
         }
     });
