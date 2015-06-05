@@ -3,9 +3,16 @@
 <h1 class="text-center">EAT FOOD</h1>
 </div>
 <div class="text-center">
-	<h2>{{item.parent.name}}</h2>
-	<h2 ng-show="item.child"><small>{{item.child.name}}</small></h2>
-	<h3 ng-hide="item.child">${{item.parent.price}}</h3>
-	<h3 ng-show="item.child">${{item.child.price}}</h3>
-	<h1><a href="" ng-click="buy()">Buy</a> | <a href="" ng-click="again()">Nope</a></h1>
+    <h2>{{item.parent.name}}</h2>
+    <h3>${{item.parent.price}}</h3>
+    <h2 ng-show="item.child"><small>with {{item.child.name}}</small></h2>
+	<h3 ng-show="item.child">add ${{item.child.price}}</h3>
+    <div ng-hide="buying">
+	   <h1><a href="" ng-click="buy()">Yes please!</a> | <a href="" ng-click="again()">Ew no!</a></h1>
+    </div>
+    <div ng-show="buying">
+        <h1>{{merchant.summary.name}}</h1>
+        <h2>{{merchant.summary.phone}}</h2>
+        <button class="btn btn-lg btn-success">ORDER</button>
+    </div>
 </div>

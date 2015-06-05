@@ -31,7 +31,7 @@ angular.module('app', [
             return Math.floor(Math.random() * length);
         };
     })
-    .factory('Order', function (
+    .factory('Merchant', function (
         client_id,
         $http
     ) {
@@ -288,7 +288,7 @@ angular.module('app', [
         $scope,
         $location,
         Choice,
-        Order
+        Merchant
     ) {
         'use strict';
         $scope.back = function () { $location.path('choose', false); };
@@ -303,13 +303,17 @@ angular.module('app', [
                 $scope.item = Choice.item;
             });
         };
-
+        $scope.buying = false;
+        $scope.merchant = {};
         $scope.buy = function () {
             if ($scope.item.id === undefined) {
                 console.error('No merchant ID found');
                 return false;
             }
-            Order.id = $scope.item.id;
-            Order.get();
+            $scope.buying = true;
+            Merchant.id = $scope.item.id;
+            Merchant.get().then(function (response) {
+                $scope.merchant = response.data.merchant;
+            });
         };
     });
