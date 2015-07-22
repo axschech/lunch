@@ -1,0 +1,11 @@
+{
+  "name": "lunch",
+  "description": "A simple lunch chooser",
+  "version": "0.1.0",
+  "dependencies": {
+    "gulp-concat": "~2.6.0",
+    "gulp": "~3.9.0",
+    "gulp-uglify": "~1.2.0",
+    "gulp-ng-annotate": "~1.0.0"
+  }
+}

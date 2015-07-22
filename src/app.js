@@ -1,7 +1,7 @@
 angular.module('app', [
     'ngRoute',
     'Merchant',
-    'Cuisines',
+    'Cuisine',
     'Choice'
 ])
     .config(function (
